@@ -149,7 +149,7 @@ class Face:
                 counter = 0
                 while cur_word.isalpha() and counter < 6:
                     try:
-                        phrase = phrase + words[i].lower() + ' '
+                        phrase = phrase + words[i].lower()
                         i += 1
                         cur_word = words[i]
                     except:
@@ -162,9 +162,9 @@ class Face:
                             temp += char
                     phrase = temp
                     if (rand(0, 12) < 3):
-                        other_words = ['Clearly, ', 'As I said, ', 'Therefore, ', 'Until of course ',
+                        other_words = ['Clearly, ', 'As I said, ', 'Therefore, ', 'Until now, ',
                                        'Ultimately, ', 'A.K.A. ', 'In other words, ', 'Our response: ',
-                                       'According to sources, ']
+                                       'An example: ', 'According to sources, ']
                         phrase = other_words[rand(0, len(other_words) - 1)] + phrase
                     elif (rand(0, 12) < 3):
                         other_words = [', but in reality it wasn\'t', ' was not the case',
