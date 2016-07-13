@@ -1,17 +1,19 @@
 {
     "quote_titles": [
-        "Knowledge Bomb", 
-        "Great Idea!", 
-        "That's something to think about...", 
-        "Such Smart", 
-        "Nah' mean?", 
-        "Yao Mang?", 
-        "Gnome Sane", 
-        "Confucious say...", 
-        "Saiyan", 
-        "This is legal advice"
+        "", 
+        "",
+        "",
+        "A great idea!", 
+        "Something we beared in mind",
+        "That's something to think about!", 
+        "such smart\nmuch wise", 
+        "Our lawyers emphasized this",
+        "Sound legal advice"
     ], 
     "talk_titles": [
+        "Android", 
+        "AngularJS", 
+        "Google",
         "Application Firewalls", 
         "Cloud Security", 
         "Taylor Swift", 
@@ -38,7 +40,8 @@
         "Qualys"
     ], 
     "image_searches": [
-        "dickbutt", 
+        "android", 
+        "robot", 
         "wat", 
         "fail", 
         "lulz", 
@@ -54,11 +57,14 @@
         "hybrid animals"
     ], 
     "giphy_searches": [
-        "dickbutt", 
+        "android", 
+        "robot", 
+        "google", 
         "wat", 
         "fail", 
         "lulz", 
         "taylor swift", 
+        "weird al", 
         "lol", 
         "meme", 
         "funny", 
@@ -68,10 +74,12 @@
         "dolphin", 
         "spooky", 
         "trippy", 
-        "gore", 
+        "boom", 
         "hybrid animals"
     ], 
     "quote_categories": [
+        "android", 
+        "robot", 
         "money", 
         "fathersday", 
         "attitude", 

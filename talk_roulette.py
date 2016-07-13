@@ -8,6 +8,7 @@ import shutil
 import hashlib
 import unicodedata
 import datetime
+import webbrowser
 
 from urllib import FancyURLopener
 import urlparse
@@ -49,8 +50,13 @@ class Trollette:
         with open("terms.json", "r") as f:
             self.terms = json.load(f)
 
-        with open(os.path.join("GIFs", "hashes.json"), "r") as f:
-            self.gifs = json.load(f)
+        try :
+            with open(os.path.join("GIFs", "hashes.json"), "r") as f:
+                self.gifs = json.load(f)
+        except:
+            self.gifs = {}
+            with open(os.path.join("GIFs", "hashes.json"), "w") as f:
+                json.dump(self.gifs, f, indent=2)
 
         with open(os.path.join("Images", "hashes.json"), "r") as f:
             self.images = json.load(f)
@@ -94,7 +100,7 @@ class Trollette:
             self.log("Directory %s already exists, overwriting..." % self.output_dir)
 
         self.slide_count = random.randint(self.slide_min, self.slide_max)
-        self.log("Generating a slide deck of %d slides about %s" % (self.slide_count, self.title))
+        self.log("Generating a slide deck of %d slides about '%s'" % (self.slide_count, self.title))
 
         try:
             self.log("Getting slide content...")
@@ -106,7 +112,7 @@ class Trollette:
             self.log("Generating slide bullets...")
             self.slide_bullets = self.my_face.get_bullets(self.slide_count*3)
         except:
-            self.log("Problem generating content for a talk on %s, exiting..." % self.title)
+            self.log("Problem generating content for a talk on '%s', exiting" % self.title)
             return
 
         #self.farm_gif_term(self.title)
@@ -125,7 +131,7 @@ class Trollette:
         slide_path = os.path.join(self.output_dir, "%s.pptx" % self.title)
         self.ppt.save(slide_path)
 
-        self.log("Successfully generated PPT on %s to %s" % (self.title, slide_path))
+        self.log("Successfully generated PPT on '%s' to:\n%s" % (self.title, slide_path))
 
     def create_title_slide(self):
         title_slide_layout = self.ppt.slide_layouts[0]
@@ -194,21 +200,17 @@ class Trollette:
 
         try:
             # Download the gif
+            #img = translate(term, app_key='foo')
             img = translate(term)
             image_path = os.path.join(self.resources_dir, "%d.gif" % slide_num)
-            wget.download(img.fixed_height.url, image_path)
-
-            file_hasher = hashlib.md5()
-            with open(image_path, "rb") as f:
-                file_hasher.update(f.read())
-            file_md5 = file_hasher.hexdigest()
+            wget.download(img.media_url, image_path)
 
             if not (term in self.gifs):
                 self.gifs[term] = []
 
-            if not (file_md5 in self.gifs[term]):
-                self.gifs[term].append(file_md5)
-                shutil.copy(image_path, os.path.join("GIFs", "%s.gif" % file_md5))
+            if not (img.id in self.gifs[term]):
+                self.gifs[term].append(img.id)
+                shutil.copy(image_path, os.path.join("GIFs", "%s.gif" % img.id))
                 with open(os.path.join("GIFs", "hashes.json"), "w") as f:
                     json.dump(self.gifs, f, indent=2)
 
@@ -527,7 +529,7 @@ class Trollette:
             self.farm_image_term(term, amount, threshold)
 
     def farm_gif_term(self, term, amount=25, threshold=10):
-        self.log("Farming GIFs for %s..." % term)
+        self.log("Farming GIFs for '%s'..." % term)
 
         if not (term in self.gifs):
             self.gifs[term] = []
@@ -542,24 +544,22 @@ class Trollette:
                 pass
 
             try:
+                #img = translate(term, app_key='foo')
                 img = translate(term)
-                wget.download(img.fixed_height.url, image_path)
-
-                image_md5 = self.get_file_md5("test.gif")
-
-                if not (image_md5 in self.gifs[term]):
-                    self.gifs[term].append(image_md5)
-                    shutil.copy(image_path, os.path.join("GIFs", "%s.gif" % image_md5))
-                    self.log("    GIF saved to archive. %d/%d GIFs." % (len(self.gifs[term]), amount))
+                if not (img.id in self.gifs[term]):
+                    self.log_inline("    [%d/%d] " % (len(self.gifs[term]), amount))
+                    wget.download(img.media_url, image_path)
+                    self.gifs[term].append(img.id)
+                    shutil.copy(image_path, os.path.join("GIFs", "%s.gif" % img.id))
+                    self.log("%s.gif" % (img.id))
                     attempt_count = 0
                 else:
-                    self.log("    Already had GIF!")
                     attempt_count += 1
             except:
-                self.log("    Downloading failed")
+                self.log("download failed")
                 attempt_count += 1
 
-        self.log("Farming of %s GIFs complete, now holding %d GIFs" % (term, len(self.gifs[term])))
+        self.log("Farming GIFs for '%s' complete with %d files" % (term, len(self.gifs[term])))
 
         with open(os.path.join("GIFs", "hashes.json"), "w") as f:
             json.dump(self.gifs, f, indent=2)
@@ -571,8 +571,6 @@ class Trollette:
         all_farm.extend(self.terms["talk_titles"])
 
         for term in all_farm:
-
-            self.log("Farming GIFs for %s..." % term)
 
             if not (term in self.gifs):
                 self.gifs[term] = []
@@ -598,8 +596,14 @@ class Trollette:
 
     def log(self, message):
         if self.console:
+            self.log_inline("%s\n" % message)
+        else:
+            print(message)
+
+    def log_inline(self, message):
+        if self.console:
             self.console.config(state=tk.NORMAL)
-            self.console.insert(tk.END, "%s\n" % message)
+            self.console.insert(tk.END, message)
             self.console.see(tk.END)
             self.console.config(state=tk.DISABLED)
             self.console.update()
@@ -859,8 +863,8 @@ class TrolletteGUI(tk.Frame):
         self.slide_count_max_entry.grid(row=2, column=3)
         self.slide_count_max_entry.insert(0, str(self.troll.slide_max))
 
-        self.image_trollerate = tk.PhotoImage(file=os.path.join("Resources", "trollerate.gif"), width=300, height=280)
-        self.go_button = ttk.Button(self.pane_trollerate, command=self.generate_troll, image=self.image_trollerate, style="Troll.TButton")
+        self.image_trollerate = tk.PhotoImage(file=os.path.join("Resources", "trollette.gif"), width=113, height=100)
+        self.go_button = ttk.Button(self.pane_trollerate, text='Make PPTX!', command=self.generate_troll, image=self.image_trollerate, style="Troll.TButton")
 
         self.go_button.grid(row=3, column=0, columnspan=4)
 
@@ -913,6 +917,10 @@ class TrolletteGUI(tk.Frame):
         self.farm_gif_button = ttk.Button(self.frame_farming, text='Farm GIFs', command=self.farm_gifs)
         self.farm_gif_button.grid(row=0, column=0)
 
+        self.farm_gif_poweredby = tk.PhotoImage(file=os.path.join("Resources", "giphy.gif"))
+        self.farm_gif_poweredby_button = ttk.Button(self.frame_farming, command=self.giphy_poweredby, image=self.farm_gif_poweredby, style="Troll.TButton")
+        self.farm_gif_poweredby_button.grid(row=0, column=1)
+
         self.farm_image_button = ttk.Button(self.frame_farming, text='Farm Images', command=self.farm_images)
         self.farm_image_button.grid(row=1, column=0)
 
@@ -925,13 +933,13 @@ class TrolletteGUI(tk.Frame):
 
     def create_styles(self):
         self.style.configure("Troll.TButton", bd=0)
-        self.style.configure("TPanedWindow", font="courier 20", background="black")
-        self.style.configure("TText", font="courier 20", background="black")
-        self.style.configure("TScale", font="courier 20", background="black")
-        self.style.configure("TEntry", font="courier 20")
-        self.style.configure("TLabel", font="courier 20", background="black")
-        self.style.configure("TOptionMenu", font="courier 20", background="black")
-        self.style.configure("TNotebook", font="courier 20", background="black")
+        self.style.configure("TPanedWindow")
+        self.style.configure("TText")
+        self.style.configure("TScale")
+        self.style.configure("TEntry")
+        self.style.configure("TLabel")
+        self.style.configure("TOptionMenu")
+        self.style.configure("TNotebook")
         self.style.configure("TSeparator", padding=20)
 
 
@@ -964,6 +972,9 @@ class TrolletteGUI(tk.Frame):
 
     def farm_gifs(self):
         self.troll.farm_gifs()
+
+    def giphy_poweredby(self):
+        webbrowser.open_new_tab('https://giphy.com')
 
     def farm_images(self):
         self.troll.farm_images()
