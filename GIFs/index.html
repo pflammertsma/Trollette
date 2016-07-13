@@ -1,0 +1,25 @@
+<html>
+
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+    <script src="hashes.js"></script>
+    <script type="text/javascript">
+        $(function() {
+            text = '';
+          $.each(gifs, function(term, gifs) {
+              text += '<h2>' + term + '</h2>';
+              $.each(gifs, function(term, gif) {
+                  text += '<img src="' + gif + '.gif" height="100"/> ';
+              });
+          });
+          $('#gifs').html(text);
+        });
+    </script>
+</head>
+
+<body>
+    <h1>GIFs</h1>
+    <div id="gifs">Loading...</div>
+</body>
+
+</html>

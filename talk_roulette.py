@@ -559,10 +559,19 @@ class Trollette:
                 self.log("download failed")
                 attempt_count += 1
 
-        self.log("Farming GIFs for '%s' complete with %d files" % (term, len(self.gifs[term])))
+            with open(os.path.join("GIFs", "hashes.json"), "w") as f:
+                json.dump(self.gifs, f, indent=2)
 
-        with open(os.path.join("GIFs", "hashes.json"), "w") as f:
-            json.dump(self.gifs, f, indent=2)
+            with open(os.path.join("GIFs", "hashes.js"), "w") as f:
+                f.write("gifs = {\n")
+                for term, hashes in self.gifs.iteritems():
+                    f.write("'%s': [\n" % term)
+                    for gif in hashes:
+                        f.write("'%s',\n" % gif)
+                    f.write("],\n")
+                f.write("};\n")
+
+        self.log("Farming GIFs for '%s' complete with %d files" % (term, len(self.gifs[term])))
 
     def farm_gifs(self, amount=25, threshold=10):
         self.show_term_counts("giphy_searches", self.gifs)
