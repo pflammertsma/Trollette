@@ -136,6 +136,7 @@ class Face:
     def parse_text(self):
         phrases = []
         words = self.content.split()
+        
         # function to take a blob and parse out apropriately sized snippets
         for index in range(0, len(words) - 1):
             if self.topic.lower()[:len(self.topic) / 4] in words[index].lower() or self.topic.split()[-1].lower() in \
@@ -149,6 +150,8 @@ class Face:
                 counter = 0
                 while cur_word.isalpha() and counter < 6:
                     try:
+                        if len(phrase) > 0:
+                            phrase += ' '
                         phrase = phrase + words[i].lower()
                         i += 1
                         cur_word = words[i]
@@ -197,6 +200,7 @@ class Face:
         # function to choose short headlines for the top of slides
         headlines = []
         while len(headlines) < min_count:
+            print('%d of %d' % (len(headlines), min_count))
             self.content += self.get_text()
             phrases = self.parse_text()
             for p in phrases:

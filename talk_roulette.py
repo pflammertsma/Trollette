@@ -40,6 +40,8 @@ class Trollette:
         self.presenter = ""
         self.title = ""
 
+        self.GIPHY_API_KEY = 'FILL API KEY HERE'
+
         self.slide_count = 0
         self.slide_min = 15
         self.slide_max = 25
@@ -171,7 +173,10 @@ class Trollette:
         top = Inches(0)
         height = Inches(8)
         width = Inches(10)
-        pic = new_slide.shapes.add_picture(image_path, left, top, height=height, width=width)
+        try:
+            pic = new_slide.shapes.add_picture(image_path, left, top, height=height, width=width)
+        except:
+            return None
         return new_slide
 
     def create_single_image_slide(self, slide_title, image_path):
@@ -201,8 +206,9 @@ class Trollette:
 
         try:
             # Download the gif
-            #img = translate(term, app_key='foo')
+            #img = translate(term, app_key=self.GIPHY_API_KEY)
             img = translate(term)
+            
             image_path = os.path.join(self.resources_dir, "%d.gif" % slide_num)
             wget.download(img.media_url, image_path)
 
@@ -556,8 +562,9 @@ class Trollette:
                 pass
 
             try:
-                #img = translate(term, app_key='foo')
+                #img = translate(term, app_key=self.GIPHY_API_KEY)
                 img = translate(term)
+                
                 if not (img.id in self.gifs[term]):
                     self.log_inline("    [%d/%d] " % (len(self.gifs[term]), amount))
                     wget.download(img.media_url, image_path)

@@ -9,12 +9,12 @@ class SlideWeights:
         self.logger = logging.getLogger("Slide Types")
         self.logger.setLevel(logging.INFO)
 
-        self.weights = {"Single GIF": 1,
-                        "Full Slide GIF": 1,
-                        "Single Image": 1,
-                        "Full Slide Image": 1,
-                        "Information": 4,
-                        "Quotation": 1
+        self.weights = {"Single GIF": 6,
+                        "Full Slide GIF": 6,
+                        "Single Image": 6,
+                        "Full Slide Image": 6,
+                        "Information": 12,
+                        "Quotation": 4
                         }
 
         # The list used by Obfusion when determining which code block will be used
