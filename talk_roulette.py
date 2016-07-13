@@ -111,7 +111,8 @@ class Trollette:
 
             self.log("Generating slide bullets...")
             self.slide_bullets = self.my_face.get_bullets(self.slide_count*3)
-        except:
+        except Exception,e:
+            print str(e)
             self.log("Problem generating content for a talk on '%s', exiting" % self.title)
             return
 
@@ -219,6 +220,10 @@ class Trollette:
             return None
 
     def download_image(self, term, slide_num):
+
+        # FIXME this API is obsolete
+        return None
+
         # If we have at least 3 local images, use one of those
         if (term in self.images) and (len(self.images[term]) > 3):
             return os.path.join("Images", "%s.img" % random.choice(self.images[term]))
@@ -283,13 +288,12 @@ class Trollette:
             return self.create_single_full_image_slide(image_path)
 
     def create_image_slide(self, slide_title, term, slide_num):
-        while True:
-            try:
-                image_path = self.download_image(term, slide_num)
-                if image_path:
-                    return self.create_single_image_slide(slide_title, image_path)
-            except:
-                pass
+        try:
+            image_path = self.download_image(term, slide_num)
+            if image_path:
+                return self.create_single_image_slide(slide_title, image_path)
+        except:
+            self.log("    Failed generating single image slide")
 
     def create_full_image_slide(self, term, slide_num):
         image_path = self.download_image(term, slide_num)
@@ -321,7 +325,9 @@ class Trollette:
         tf = body_shape.text_frame
         for b in sb:
             p = tf.add_paragraph()
-            #p.text = b
+
+            b = b.capitalize()
+            self.log("    %s" % b)
 
             p.alignment = PP_PARAGRAPH_ALIGNMENT.LEFT
             run1 = p.add_run()
@@ -479,6 +485,12 @@ class Trollette:
         if not (term in self.images):
             self.images[term] = []
 
+        # FIXME this API is obsolete
+        # FIXME replace with Getty:
+        # curl -X POST -H "Content-Type: application/x-www-form-urlencoded" -d 'grant_type=password&client_id=exampleApiKey&client_secret=exampleSecret&username=someUsername&password=WithSomePassword' https://api.gettyimages.com/oauth2/token
+        # key: u3mpnbc9bv83enawbtmrxwkd
+        # secret: GDECVpcxAag7E3B8KyxUkHTX9PGBbZEGABfnPThFzKw5Z
+
         attempt_count = 0
         while (attempt_count < threshold) and (len(self.images[term]) < amount):
             myopener = MyOpener()
@@ -564,9 +576,9 @@ class Trollette:
 
             with open(os.path.join("GIFs", "hashes.js"), "w") as f:
                 f.write("gifs = {\n")
-                for term, hashes in self.gifs.iteritems():
-                    f.write("'%s': [\n" % term)
-                    for gif in hashes:
+                for gifs_term, gifs_hashes in self.gifs.iteritems():
+                    f.write("'%s': [\n" % gifs_term)
+                    for gif in gifs_hashes:
                         f.write("'%s',\n" % gif)
                     f.write("],\n")
                 f.write("};\n")
@@ -580,6 +592,7 @@ class Trollette:
         all_farm.extend(self.terms["talk_titles"])
 
         for term in all_farm:
+            term = term.lower()
 
             if not (term in self.gifs):
                 self.gifs[term] = []

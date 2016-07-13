@@ -12,6 +12,9 @@ class Face:
         self.content = ''
         self.topic = topic
 
+        self.uncertain = ' can mean many things, but to me it is'
+        self.unknown = ' is a difficult concept to grasp'
+
         if self.topic:
             self.content = self.get_text()
 
@@ -42,9 +45,9 @@ class Face:
                 self.content += more_content
             more_content = wikipedia.page(topic_results[rand(0, len(topic_results) - 1)]).content
         except wikipedia.exceptions.DisambiguationError as e:
-            self.content += self.topic + ' can mean many things but to me it is'
+            self.content += self.topic + self.uncertain
         except wikipedia.exceptions.PageError as e:
-            self.content += self.topic + ' is sometimes hard to find'
+            self.content += self.topic + self.unknown
 
         # if there are more than one word in the topic try to get some more results with the first and last word
         if len(self.topic.split()) > 1:
@@ -56,9 +59,9 @@ class Face:
                 if more_content not in self.content:
                     self.content += more_content
             except wikipedia.exceptions.DisambiguationError as e:
-                self.content += self.topic + ' can mean many things but to me it is'
+                self.content += self.topic + self.uncertain
             except wikipedia.exceptions.PageError as e:
-                self.content += self.topic + ' is sometimes hard to find'
+                self.content += self.topic + self.unknown
             try:
                 # get even more with the second half of the topic for wierd results maybe
                 topic_results = wikipedia.search(self.topic.split()[-1:])
@@ -67,9 +70,9 @@ class Face:
                 if more_content not in self.content:
                     self.content += more_content
             except wikipedia.exceptions.DisambiguationError as e:
-                self.content += self.topic + ' can mean many things but to me it is'
+                self.content += self.topic + self.uncertain
             except wikipedia.exceptions.PageError as e:
-                self.content += self.topic + ' is sometimes hard to find'
+                self.content += self.topic + self.unknown
         try:
             # do a wikipedia search for the topic
             topic_results = wikipedia.search(self.topic[:len(self.topic) / 2])
@@ -77,10 +80,11 @@ class Face:
             # pick one of the results and grab the self.content
             self.content += wikipedia.page(topic_results[rand(0, len(topic_results) - 1)]).content
         except wikipedia.exceptions.DisambiguationError as e:
-            self.content += self.topic + ' can mean many things but to me it is'
+            self.content += self.topic + self.uncertain
         except wikipedia.exceptions.PageError as e:
-            self.content += self.topic + ' is sometimes hard to find'
-        return self.content
+            self.content += self.topic + self.unknown
+
+        return self.content.capitalize()
 
     def research_topic(self, topic, logger):
         content = ""
@@ -99,12 +103,10 @@ class Face:
             except:
                 pass
 
-        return content
+        return content.capitalize()
 
     def fully_research_topic(self, topic, logger):
-        content = ""
-
-        content += self.research_topic(topic, logger)
+        content = self.research_topic(topic, logger)
 
         #except wikipedia.exceptions.DisambiguationError as e:
         #    self.content += topic + ' can mean many things but to me it is'
@@ -125,11 +127,11 @@ class Face:
                     content += self.research_topic(topic_split[i], logger)
 
                 except wikipedia.exceptions.DisambiguationError as e:
-                    content += topic + ' can mean many things but to me it is'
+                    content += topic + self.uncertain
                 except wikipedia.exceptions.PageError as e:
-                    content += topic + ' is sometimes hard to find'
+                    content += topic + self.unknown
 
-        return content
+        return content.capitalize()
 
     def parse_text(self):
         phrases = []
@@ -159,12 +161,18 @@ class Face:
                         if char.isalpha() or char.isspace():
                             temp += char
                     phrase = temp
-                    other_words = ['using only my', 'forever!', 'because', 'for once in your life', 'until',
-                                   'Great Job!', ', but in reality', 'is wrong!', 'is #1', 'never dies', 'is really',
-                                   'might be', 'or not', 'better known as', 'the worst', 'kinda feels like', ', right?',
-                                   '', ', WTF!', ', for realz', ', tru fact', 'in the feels','probably the best','?']
-                    phrase += other_words[rand(0, len(other_words) - 1)]
-                    phrases.append(phrase)
+                    if (rand(0, 12) < 3):
+                        other_words = ['Clearly, ', 'As I said, ', 'Therefore, ', 'Until of course ',
+                                       'Ultimately, ', 'A.K.A. ', 'In other words, ', 'Our response: ',
+                                       'According to sources, ']
+                        phrase = other_words[rand(0, len(other_words) - 1)] + phrase
+                    elif (rand(0, 12) < 3):
+                        other_words = [', but in reality it wasn\'t', ' was not the case',
+                                       '... or not', ', right?', '... WTF!', 
+                                       ', according to sources', ', experts say', 
+                                       '!', '!!!', '?!', '?']
+                        phrase = phrase + other_words[rand(0, len(other_words) - 1)]
+                    phrases.append(phrase.capitalize())
         phrases = list(set(phrases))
         return phrases
 
